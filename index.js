@@ -18,3 +18,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Endpoint to upload a song
+app.post('/upload', upload.single('song'), async (req, res) => {
+    const songBuffer = req.file.buffer;
+    const { title, artist, album, genre, release_year, track_number, duration, album_art_url } = req.body;
+  });
