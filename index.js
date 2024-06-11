@@ -36,11 +36,38 @@ app.post('/upload', upload.single('song'), async (req, res) => {
     if (songError) return res.status(400).send(songError.message);
 
     // Save fingerprint to Supabase
-  const { data: fingerprintData, error: fingerprintError } = await supabase
-  .from('fingerprints')
-  .insert([{ song_id: songData.id, fingerprint }]);
+    const { data: fingerprintData, error: fingerprintError } = await supabase
+    .from('fingerprints')
+    .insert([{ song_id: songData.id, fingerprint }]);
 
-if (fingerprintError) return res.status(400).send(fingerprintError.message);
+    if (fingerprintError) return res.status(400).send(fingerprintError.message);
 
-res.send('Song uploaded and processed');
+    res.send('Song uploaded and processed');
 });
+
+// Endpoint to match a song
+app.post('/match', upload.single('song'), async (req, res) => {
+    const songBuffer = req.file.buffer;
+  
+    // Generate fingerprint
+    const fingerprint = await chromaprint.songBuffer(songBuffer);
+  
+    // Match fingerprint with database
+    const { data: fingerprintData, error: fingerprintError } = await supabase
+      .from('fingerprints')
+      .select()
+      .eq('fingerprint', fingerprint)
+      .single();
+  
+    if (fingerprintError || !fingerprintData) return res.status(400).send('No match found.');
+  
+    const { data: songData, error: songError } = await supabase
+      .from('songs')
+      .select()
+      .eq('id', fingerprintData.song_id)
+      .single();
+  
+    if (songError) return res.status(400).send(songError.message);
+  
+    res.send(`Song matched: ${songData.title} by ${songData.artist}`);
+  });
