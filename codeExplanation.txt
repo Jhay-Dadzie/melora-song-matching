@@ -1,0 +1,42 @@
+The code starts by requiring several dependencies:
+
+express: A Node.js framework for building web applications.
+body-parser: A middleware that parses incoming request bodies in a format that's easy to work with.
+multer: A middleware that handles multipart/form-data requests, which allows users to upload files.
+@supabase/supabase-js: A JavaScript client for Supabase, a cloud-based database service.
+chromaprint: A library for generating acoustic fingerprints from audio files.
+The code then creates an Express app, sets up Multer for file uploads, and defines the port for the server to listen on.
+
+Supabase Configuration
+
+The code retrieves two environment variables: supabaseUrl and supabaseKey, which are used to create a Supabase client instance. This client is used to interact with the Supabase database.
+
+Endpoint: /upload
+
+This endpoint is responsible for uploading a song and processing its acoustic fingerprint.
+
+Here's what happens when a request is sent to /upload:
+
+Multer parses the incoming request and extracts a single file, song, from the request body.
+The songBuffer is extracted from the uploaded file.
+The acoustic fingerprint of the song is generated using the chromaprint library.
+The song metadata (title, artist, album, genre, etc.) is extracted from the request body.
+The song metadata is inserted into the songs table in the Supabase database.
+The acoustic fingerprint is inserted into the fingerprints table in the Supabase database, along with the song ID.
+If the insertion is successful, the response is set to "Song uploaded and processed".
+Endpoint: /match
+
+This endpoint is responsible for matching an uploaded song against the existing songs in the database.
+
+Here's what happens when a request is sent to /match:
+
+Multer parses the incoming request and extracts a single file, song, from the request body.
+The acoustic fingerprint of the uploaded song is generated using the chromaprint library.
+The fingerprint is used to query the fingerprints table in the Supabase database, searching for a matching fingerprint.
+If a match is found, the corresponding song ID is retrieved from the fingerprints table.
+The song metadata is retrieved from the songs table using the retrieved song ID.
+The response is set to the matched song title and artist.
+The user's song history is updated by inserting a new entry into the user_history table with the user ID and song ID.
+Other
+
+The code uses async/await syntax to handle asynchronous operations, such as database queries and file uploads. Error handling is performed using try-catch blocks and error objects returned from Supabase queries.
