@@ -26,4 +26,12 @@ app.post('/upload', upload.single('song'), async (req, res) => {
 
     // Generate fingerprint
     const fingerprint = await chromaprint.songBuffer(songBuffer);
+
+    // Save song to Supabase
+    const { data: songData, error: songError } = await supabase
+    .from('songs')
+    .insert([{ title, artist, album, genre, release_year, track_number, duration, album_art_url }])
+    .single();
+
+if (songError) return res.status(400).send(songError.message);
 });
