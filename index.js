@@ -33,5 +33,14 @@ app.post('/upload', upload.single('song'), async (req, res) => {
     .insert([{ title, artist, album, genre, release_year, track_number, duration, album_art_url }])
     .single();
 
-if (songError) return res.status(400).send(songError.message);
+    if (songError) return res.status(400).send(songError.message);
+
+    // Save fingerprint to Supabase
+  const { data: fingerprintData, error: fingerprintError } = await supabase
+  .from('fingerprints')
+  .insert([{ song_id: songData.id, fingerprint }]);
+
+if (fingerprintError) return res.status(400).send(fingerprintError.message);
+
+res.send('Song uploaded and processed');
 });
